@@ -7,9 +7,10 @@
     <title>Stress domain</title>
     <style>
         #visualization {
-            border: 5px solid #ccc;
+            border: 5px solid #898989;
         }
     </style>
+    <script src="StressDomain.js"></script>
 </head>
 
 <body>
@@ -17,139 +18,10 @@
     <canvas id="visualization"></canvas>
 
     <script>
-        document.addEventListener('DOMContentLoaded', _ => {
-            const canvas = document.getElementById('visualization');
-            canvas.width = 500
-            canvas.height = 500
-            const ctx = canvas.getContext('2d');
-
-            // Set up canvas for high-resolution displays
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-            ctx.scale(dpr, dpr);
-
-            const width = rect.width;
-            const height = rect.height;
-            const margin = { top: 20, right: 20, bottom: 50, left: 40 };
-            const graphWidth = width - margin.left - margin.right;
-            const graphHeight = height - margin.top - margin.bottom;
-
-            // Helper functions
-            function scaleX(value) {
-                return (value / 3) * graphWidth + margin.left;
-            }
-
-            function scaleY(value) {
-                return graphHeight - (value / 180) * graphHeight + margin.top;
-            }
-
-            function drawVisualization() {
-                // Clear canvas
-                ctx.clearRect(0, 0, width * dpr, height * dpr);
-
-                // Draw background rectangles
-                ctx.fillStyle = 'rgba(255, 127, 0, 0.5)';
-                ctx.fillRect(scaleX(0), margin.top, graphWidth / 3, graphHeight);
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-                ctx.fillRect(scaleX(1), margin.top, graphWidth / 3, graphHeight);
-                ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-                ctx.fillRect(scaleX(2), margin.top, graphWidth / 3, graphHeight);
-
-                // Draw axes
-                ctx.beginPath();
-                ctx.moveTo(margin.left, height - margin.bottom);
-                ctx.lineTo(width - margin.right, height - margin.bottom);
-                ctx.moveTo(margin.left, margin.top);
-                ctx.lineTo(margin.left, height - margin.bottom);
-                ctx.stroke();
-
-                // Draw ticks and labels
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.font = '12px Arial';
-                for (let i = 0; i <= 3; i++) {
-                    const x = scaleX(i);
-                    ctx.moveTo(x, height - margin.bottom);
-                    ctx.lineTo(x, height - margin.bottom + 5);
-                    ctx.fillText(i.toString(), x, height - margin.bottom + 10);
-                }
-
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'middle';
-                for (let i = 0; i <= 180; i += 45) {
-                    const y = scaleY(i);
-                    ctx.moveTo(margin.left - 5, y);
-                    ctx.lineTo(margin.left, y);
-                    ctx.fillText(i.toString(), margin.left - 10, y);
-                }
-                ctx.stroke();
-
-                // Draw labels
-                ctx.textAlign = 'center';
-                ctx.font = '14px Arial';
-                ctx.fillText("R", width / 2, height - 10);
-
-                ctx.save();
-                ctx.translate(margin.left - 30, height / 2);
-                ctx.rotate(-Math.PI / 2);
-                ctx.fillText("θ°", 0, 0);
-                ctx.restore();
-
-                // Draw regime labels
-                ctx.textBaseline = 'bottom';
-                ctx.fillText("Normal", scaleX(0.5), height - 25);
-                ctx.fillText("Strike slip", scaleX(1.5), height - 25);
-                ctx.fillText("Reverse", scaleX(2.5), height - 25);
-            }
-
-            function addPoint(R, theta) {
-                // Convert R to Φ' based on the regime
-                let phiPrime;
-                if (R >= 0 && R < 1) {
-                    phiPrime = R; // Normal fault regime
-                } else if (R >= 1 && R < 2) {
-                    phiPrime = 2 - R; // Strike-slip fault regime
-                } else if (R >= 2 && R <= 3) {
-                    phiPrime = R - 2; // Reverse fault regime
-                } else {
-                    console.error("R value out of range (0-3)");
-                    return;
-                }
-
-                // Calculate the position on the canvas
-                const x = scaleX(R);
-                const y = scaleY(theta);
-
-                // Draw the point
-                //ctx.beginPath();
-                //ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                //ctx.fillStyle = 'red';
-                //ctx.fill();
-                // ctx.strokeStyle = 'black';
-                // ctx.stroke();
-                ctx.fillStyle = 'rgba(255, 127, 0, 0.5)';
-                ctx.fillRect(scaleX(0), margin.top, graphWidth / 3, graphHeight);
-
-                // Add a label
-                ctx.fillStyle = 'black';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'bottom';
-                ctx.font = '12px Arial';
-                ctx.fillText(`(R=${R.toFixed(1)}, θ=${theta.toFixed(0)}°)`, x - 30, y - 10);
-            }
-
-            // Initial draw
-            drawVisualization();
-
-            // Example usage:
-            addPoint(0.5, 60);  // Normal fault regime
-            addPoint(1.5, 120); // Strike-slip fault regime
-            addPoint(2.5, 30);  // Reverse fault regime
-        });
+        const d = new StressDomain('visualization', 500, 500)
+        d.addPoint(0.5, 60)
+        d.addPoint(1.5, 120)
+        d.addPoint(2.5, 30)
     </script>
 </body>
 
